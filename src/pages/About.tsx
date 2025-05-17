@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -14,117 +13,95 @@ const About = () => {
           <div className="relative mb-10 flex justify-center">
             <div className="h-1 w-16 bg-reggae-gold"></div>
           </div>
-          
+
           {/* Mission Statement */}
           <div className="max-w-3xl mx-auto text-center mb-16">
             <p className="text-xl leading-relaxed">
-              House of Reggae (HoR) is Uganda's premier reggae culture movement, dedicated to 
-              celebrating, promoting, and uniting reggae talent across East Africa. Founded in 2018, 
-              we've grown from intimate gatherings to a cultural institution that pushes the 
-              boundaries of reggae music and its associated lifestyle.
+              House of Reggae (HoR) is a dynamic Ugandan platform dedicated to nurturing and promoting reggae talent. Born out of Ras Clan Entertainment in 2003, HoR has evolved into a vibrant collective that unites artists, DJs, MCs, and cultural ambassadors who share a passion for reggae music and its rich cultural heritage.
             </p>
           </div>
-          
+
           {/* History Section */}
           <div className="mb-16 bg-reggae-light p-8 rounded-xl">
             <h2 className="text-3xl font-heading mb-6">Our Story</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <p className="mb-4">
-                  House of Reggae began as a small gathering of reggae enthusiasts in the backyard of founder 
-                  Marcus Garvey Jr. What started as friends sharing their favorite reggae records quickly 
-                  evolved into regular events that attracted larger and more diverse crowds from across Kampala.
+                  House of Reggae emerged from the vision of Ras Clan Entertainment in 2003, starting as a passionate initiative to celebrate and elevate reggae music in Uganda. What began as a small collective of reggae enthusiasts has grown into a cultural movement that amplifies the voices of creatives in the reggae world.
                 </p>
                 <p>
-                  By 2020, our "Rootsman" series of events had become the talk of the Uganda music scene, 
-                  bringing together both established and underground reggae talent. Today, we operate as a 
-                  full cultural movement with regular events, a record label, merchandise line, and a 
-                  strong community of reggae lovers.
+                  Today, HoR is a community-driven platform that curates opportunities for both emerging and established talent, hosting electrifying performances, cultural festivals, and sharing exclusive mixes and archival sets on streaming platforms. We are committed to keeping reggae alive and evolving, both locally and globally.
                 </p>
               </div>
               <div className="relative">
-                <img 
-                  src="/reggae-history.jpg" 
-                  alt="The first House of Reggae gathering" 
+                <img
+                  src="/comm.jpg"
+                  alt="House of Reggae cultural event"
                   className="rounded-lg shadow-lg w-full h-full object-cover"
                 />
               </div>
             </div>
           </div>
-          
+
           {/* What We Do */}
           <div className="mb-16">
             <h2 className="text-3xl font-heading mb-10 text-center">What We Do</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <ServiceCard 
+              <ServiceCard
                 icon={<Music size={40} />}
-                title="Music Production"
-                description="We curate and produce reggae music, from classic roots to contemporary dancehall, showcasing Uganda's finest talent."
+                title="Talent Development"
+                description="We support artists in developing their craft, expanding their portfolios, and connecting with audiences worldwide."
               />
-              <ServiceCard 
+              <ServiceCard
                 icon={<Calendar size={40} />}
-                title="Events & Shows"
-                description="Regular live events bringing together DJs, vocalists, and bands for authentic reggae experiences."
+                title="Events & Festivals"
+                description="Hosting electrifying performances and cultural festivals to celebrate reggae’s transformative power."
               />
-              <ServiceCard 
+              <ServiceCard
                 icon={<Users size={40} />}
                 title="Community Building"
-                description="Creating spaces for reggae lovers to connect, share, and celebrate the culture and lifestyle."
+                description="Creating a vibrant collective of artists, DJs, MCs, and cultural ambassadors united by reggae."
               />
-              <ServiceCard 
+              <ServiceCard
                 icon={<Heart size={40} />}
                 title="Cultural Preservation"
-                description="Documenting and preserving Uganda's unique contribution to global reggae culture."
+                description="Preserving reggae’s roots while embracing its evolution through exclusive mixes and archival sets."
               />
             </div>
           </div>
-          
+
           {/* Team Section */}
           <div className="mb-16">
             <h2 className="text-3xl font-heading mb-10 text-center">Meet Our Team</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <TeamMember 
-                name="Marcus Garvey Jr." 
+              <TeamMember
+                name="Marcus Garvey Jr."
                 role="Founder & Creative Director"
                 image="/reggae-team1.jpg"
               />
-              <TeamMember 
-                name="DJ Zion" 
+              <TeamMember
+                name="DJ Zion"
                 role="Head of Music"
                 image="/reggae-team2.jpg"
               />
-              <TeamMember 
-                name="Sarah Roots" 
+              <TeamMember
+                name="Sarah Roots"
                 role="Events Manager"
                 image="/reggae-team3.jpg"
               />
-              <TeamMember 
-                name="Jah Mike" 
-                role="Sound Engineer"
-                image="/reggae-team4.jpg"
-              />
-              <TeamMember 
-                name="Queen Nyah" 
-                role="Community Relations"
-                image="/reggae-team5.jpg"
-              />
-              <TeamMember 
-                name="Lion Heart" 
-                role="Merchandise Design"
-                image="/reggae-team6.jpg"
-              />
+
             </div>
           </div>
-          
+
           {/* Testimonials */}
           <div className="mb-16 bg-reggae-green text-white p-8 rounded-xl">
             <h2 className="text-3xl font-heading mb-10 text-center">What People Say</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <Testimonial 
+              <Testimonial
                 quote="House of Reggae has completely transformed Uganda's music scene. Their events are unlike anything else in East Africa."
                 author="The Kampala Times"
               />
-              <Testimonial 
+              <Testimonial
                 quote="The authenticity and passion behind this movement is what makes it special. It's not just about music, it's about a way of life."
                 author="International Reggae Magazine"
               />
@@ -150,8 +127,8 @@ const ServiceCard = ({ icon, title, description }) => (
 const TeamMember = ({ name, role, image }) => (
   <div className="bg-white rounded-lg overflow-hidden shadow-md group">
     <div className="h-64 overflow-hidden">
-      <img 
-        src={image} 
+      <img
+        src={image}
         alt={name}
         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
       />

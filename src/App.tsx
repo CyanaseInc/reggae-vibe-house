@@ -13,6 +13,8 @@ import Mixes from "./pages/Mixes";
 import Events from "./pages/Events";
 import Team from "./pages/Team";
 import NotFound from "./pages/NotFound";
+import ArtistProfile from "./pages/artistProfile";
+import ScrollToTop from "./components/scroll";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +24,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/gallery" element={<Gallery />} />
@@ -31,6 +34,7 @@ const App = () => (
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/mixes" element={<Mixes />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/profile" element={<ArtistProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

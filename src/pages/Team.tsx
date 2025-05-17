@@ -79,7 +79,7 @@ const Team = () => {
   return (
     <>
       <Navbar />
-      
+
       <main className="min-h-screen bg-[url('/wood-texture.jpg')] bg-fixed bg-cover">
         <div className="bg-reggae-black bg-opacity-95 min-h-screen">
           {/* Hero Banner */}
@@ -92,23 +92,21 @@ const Team = () => {
               </p>
             </div>
           </div>
-          
+
           {/* Our Mission */}
           <section className="py-16 bg-gradient-to-b from-reggae-black/90 to-transparent">
             <div className="container mx-auto px-4 text-center">
               <h2 className="font-heading text-3xl md:text-4xl text-white mb-8">OUR MISSION</h2>
               <p className="text-xl max-w-3xl mx-auto mb-10 text-white/80">
-                House of Reggae was founded with a clear purpose: to preserve, promote, and celebrate 
-                the rich legacy of reggae music in Uganda while fostering a vibrant community united by 
-                the positive values of reggae culture.
+                Our mission is to support and amplify the voices of creatives in the reggae world. We curate opportunities for emerging and established talent to shine by helping them develop their craft, expand their portfolios, and connect with audiences both locally and globally.
               </p>
-              
+
               <div className="flex justify-center">
                 <div className="h-1 w-32 reggae-gradient"></div>
               </div>
             </div>
           </section>
-          
+
           {/* Team Grid */}
           <section className="py-16">
             <div className="container mx-auto px-4">
@@ -119,14 +117,14 @@ const Team = () => {
               </div>
             </div>
           </section>
-          
+
           {/* Join Us Section */}
           <section className="py-16 bg-[url('/reggae-concert1.jpg')] bg-cover bg-center relative">
             <div className="absolute inset-0 bg-gradient-to-r from-reggae-black to-reggae-black/70"></div>
             <div className="container mx-auto px-4 text-center relative z-10">
               <h2 className="font-heading text-3xl md:text-4xl text-white mb-6">JOIN OUR TEAM</h2>
               <p className="text-lg max-w-2xl mx-auto mb-8 text-white/80">
-                Passionate about reggae music and culture? We're always looking for volunteers and contributors 
+                Passionate about reggae music and culture? We're always looking for volunteers and contributors
                 to help us grow the reggae community in Uganda.
               </p>
               <button className="bg-reggae-green text-white font-bold py-3 px-8 rounded-md hover:bg-opacity-90 transition duration-200 inline-flex items-center">
@@ -137,7 +135,7 @@ const Team = () => {
           </section>
         </div>
       </main>
-      
+
       <Footer />
     </>
   );
@@ -147,18 +145,18 @@ const TeamMember = ({ member }: { member: any }) => {
   return (
     <div className="bg-white/10 backdrop-blur-sm rounded-xl overflow-hidden hover:transform hover:scale-105 transition duration-300">
       <div className="h-80 overflow-hidden">
-        <img 
-          src={member.imageUrl} 
-          alt={member.name} 
+        <img
+          src={member.imageUrl}
+          alt={member.name}
           className="w-full h-full object-cover"
         />
       </div>
-      
+
       <div className="p-6">
         <h3 className="font-heading text-2xl text-white mb-1">{member.name}</h3>
         <p className="text-reggae-gold mb-4">{member.role}</p>
         <p className="text-white/70 mb-6">{member.bio}</p>
-        
+
         <div className="pt-4 border-t border-white/10 space-y-2">
           {member.social.email && (
             <div className="flex items-center text-white/60 hover:text-white/90 transition">
@@ -166,14 +164,14 @@ const TeamMember = ({ member }: { member: any }) => {
               <span>{member.social.email}</span>
             </div>
           )}
-          
+
           {member.social.instagram && (
             <div className="flex items-center text-white/60 hover:text-white/90 transition">
               <Instagram size={16} className="mr-2" />
               <span>{member.social.instagram}</span>
             </div>
           )}
-          
+
           {member.social.website && (
             <div className="flex items-center text-white/60 hover:text-white/90 transition">
               <Globe size={16} className="mr-2" />

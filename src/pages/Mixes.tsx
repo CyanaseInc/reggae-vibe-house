@@ -1,126 +1,169 @@
-
+// src/pages/Mixes.tsx
 import React, { useState, useEffect } from 'react';
 import { Headphones, Music, Play, Volume, Clock, Heart } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
-const mixes = [
-  {
-    id: 1,
-    title: 'Rootsman Edition 4',
-    dj: 'DJ Zion',
-    genre: 'Ugandan Reggae',
-    date: 'May 2, 2025',
-    duration: '1:28:45',
-    likes: 342,
-    popular: true,
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1219621886&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-dj.jpg',
-    description: 'Deep roots reggae selections featuring classic Ugandan artists and international legends.',
-  },
-  {
-    id: 2,
-    title: "Skank'n Reggae 8",
-    dj: 'Selecta Morris',
-    genre: 'Dub',
-    date: 'April 15, 2025',
-    duration: '1:45:20',
-    likes: 289,
-    popular: true,
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1334568403&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-drums.jpg',
-    description: 'Heavy dub plates and bass-driven selections to move your soul and sound system.',
-  },
-  {
-    id: 3,
-    title: 'Empress Vibes Vol. 1',
-    dj: 'Sister Blaze',
-    genre: 'Roots',
-    date: 'March 28, 2025',
-    duration: '1:18:12',
-    likes: 245,
-    popular: false,
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1508795148&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-artwork.jpg',
-    description: 'Celebrating female reggae artists from across Africa and the Caribbean. Powerful lyrics and conscious vibes.',
-  },
-  {
-    id: 4,
-    title: 'Lovers Rock Special',
-    dj: 'DJ Conscious',
-    genre: 'Lovers Rock',
-    date: 'February 14, 2025',
-    duration: '1:35:50',
-    likes: 412,
-    popular: true,
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1410256938&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-beach.jpg',
-    description: 'Smooth and soulful reggae love songs for a perfect romantic evening.',
-  },
-  {
-    id: 5,
-    title: 'Dancehall Sessions 12',
-    dj: 'DJ Ruga',
-    genre: 'Dancehall',
-    date: 'January 20, 2025',
-    duration: '1:22:45',
-    likes: 367,
-    popular: false,
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1219621886&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-dancers.jpg',
-    description: 'High energy dancehall beats to get the party jumping. Latest hits and classic riddims.',
-  },
-  {
-    id: 6,
-    title: 'Conscious Chronicles',
-    dj: 'Lion Heart',
-    genre: 'Roots',
-    date: 'December 12, 2024',
-    duration: '1:48:32',
-    likes: 298,
-    popular: false,
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1334568403&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-crowd.jpg',
-    description: 'Deep and spiritual selections focused on conscious messages and liberation themes.',
-  },
-];
+const USERNAME = "house-of-reggae-637215843";
+const CLIENT_ID = "CcuNTbKkAMIPLedGcyTw430ppDRwSZ3n"; // Replace with your SoundCloud Client ID
+const CLIENT_SECRET = "P3EBzF7Bw8CuSTqG0zw4pIdJaMTbbEn2"; // Replace with your SoundCloud Client Secret
 
 const categories = ['All', 'Ugandan Reggae', 'Roots', 'Dub', 'Lovers Rock', 'Dancehall'];
 
 const Mixes = () => {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(null);
+  const [tracks, setTracks] = useState([]);
+  const [accessToken, setAccessToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredMixes = activeCategory === 'All' 
-    ? mixes 
-    : mixes.filter(mix => mix.genre === activeCategory);
-    
-  const popularMixes = mixes.filter(mix => mix.popular);
-
-  // Simulate a player effect
+  // Fetch token from SoundCloud API
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (activeIndex !== null && isPlaying) {
-      timeout = setTimeout(() => {
-        setIsPlaying(false);
-      }, 30000); // Auto-stop after 30 seconds
-    }
-    return () => clearTimeout(timeout);
-  }, [activeIndex, isPlaying]);
+    const fetchToken = async () => {
+      // Check cached token
+      const cachedToken = localStorage.getItem('soundcloud_access_token');
+      const cachedExpiry = localStorage.getItem('soundcloud_token_expiry');
+      const now = Date.now();
 
-  const handlePlay = (index: number) => {
-    setActiveIndex(index);
-    setIsPlaying(true);
+      if (cachedToken && cachedExpiry && now < parseInt(cachedExpiry)) {
+        setAccessToken(cachedToken);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const credentials = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
+        const response = await fetch("https://secure.soundcloud.com/oauth/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Basic ${credentials}`,
+            Accept: "application/json; charset=utf-8",
+          },
+          body: new URLSearchParams({
+            grant_type: "client_credentials",
+          }),
+        });
+        const data = await response.json();
+
+        if (data.access_token) {
+          setAccessToken(data.access_token);
+          localStorage.setItem("soundcloud_access_token", data.access_token);
+          localStorage.setItem(
+            "soundcloud_token_expiry",
+            (now + data.expires_in * 1000).toString()
+          );
+          setIsLoading(false);
+        } else {
+          throw new Error("No access token in response");
+        }
+      } catch (error) {
+        console.error("Error fetching token:", error.message);
+        setIsLoading(false);
+      }
+    };
+
+    fetchToken();
+  }, []);
+
+  // Resolve SoundCloud user ID
+  const resolveUserId = async (username, token) => {
+    try {
+      const response = await fetch(
+        `https://api.soundcloud.com/resolve?url=https://soundcloud.com/${username}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json; charset=utf-8",
+          },
+        }
+      );
+      const data = await response.json();
+      console.log("Resolved User ID:", data.id);
+      return data.id;
+    } catch (error) {
+      console.error("Error resolving user ID:", error);
+      return null;
+    }
+  };
+
+  // Fetch tracks from SoundCloud
+  const fetchTracks = async (userId, token) => {
+    try {
+      const response = await fetch(
+        `https://api.soundcloud.com/users/${userId}/tracks?limit=50`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json; charset=utf-8",
+          },
+        }
+      );
+      const data = await response.json();
+      console.log("Fetched Tracks:", data);
+      const mappedTracks = data.map((track, index) => ({
+        id: track.id,
+        title: track.title,
+        dj: track.user.username,
+        genre: track.genre || categories[(index % (categories.length - 1)) + 1] || 'Reggae',
+        date: new Date(track.created_at).toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+        duration: `${Math.floor(track.duration / 1000 / 60)}:${Math.floor((track.duration / 1000) % 60)
+          .toString()
+          .padStart(2, '0')}`,
+        likes: track.favoritings_count || Math.floor(Math.random() * 500),
+        popular: index < 2,
+        embedUrl: `https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${track.id}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true`,
+        imageUrl: track.artwork_url?.replace('-large', '-t500x500') || '/reggae-artwork.jpg',
+        description: track.description || 'A vibrant reggae mix showcasing top tracks and artists.',
+      }));
+      setTracks(mappedTracks);
+    } catch (error) {
+      console.error("Error fetching tracks:", error);
+    }
+  };
+
+  // Fetch tracks when token is available
+  useEffect(() => {
+    const fetchData = async () => {
+      if (accessToken) {
+        const userId = await resolveUserId(USERNAME, accessToken);
+        if (userId) {
+          fetchTracks(userId, accessToken);
+        }
+      }
+    };
+
+    fetchData();
+  }, [accessToken]);
+
+  const filteredMixes = activeCategory === 'All'
+    ? tracks
+    : tracks.filter((mix) => mix.genre === activeCategory);
+
+  const popularMixes = tracks.filter((mix) => mix.popular);
+
+  const handlePlay = (index) => {
+    if (activeIndex === index) {
+      setActiveIndex(null); // Pause if clicking the same mix
+    } else {
+      setActiveIndex(index); // Play new mix
+    }
+  };
+
+  const getIframeSrc = (mix, index) => {
+    const baseUrl = mix.embedUrl;
+    return activeIndex === index ? baseUrl.replace('auto_play=false', 'auto_play=true') : baseUrl;
   };
 
   return (
     <>
       <Navbar />
-      
       <main className="min-h-screen bg-[url('/wood-texture.jpg')] bg-fixed bg-cover">
         <div className="bg-reggae-black bg-opacity-95 min-h-screen pb-16">
-          {/* Hero Banner */}
           <div className="bg-[url('/reggae-concert1.jpg')] bg-cover bg-center py-20 pt-32 relative">
             <div className="absolute inset-0 bg-gradient-to-b from-reggae-black/80 to-reggae-black/95"></div>
             <div className="container mx-auto px-4 text-center relative z-10">
@@ -133,21 +176,24 @@ const Mixes = () => {
               </p>
             </div>
           </div>
-          
-          {/* Featured Mix - Spotify Style */}
+
           {popularMixes.length > 0 && (
             <section className="py-8 bg-gradient-to-b from-reggae-black to-transparent">
               <div className="container mx-auto px-4">
                 <h2 className="font-heading text-3xl text-white mb-6">Featured Mix</h2>
                 <div className="flex flex-col md:flex-row bg-gradient-to-r from-reggae-black to-reggae-black/70 rounded-xl overflow-hidden">
                   <div className="md:w-1/3 h-80 relative group cursor-pointer" onClick={() => handlePlay(0)}>
-                    <img src={popularMixes[0].imageUrl} alt={popularMixes[0].title} className="w-full h-full object-cover" />
+                    <img
+                      src={popularMixes[0].imageUrl}
+                      alt={popularMixes[0].title}
+                      className="w-full h-full object-cover"
+                    />
                     <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="w-16 h-16 rounded-full bg-reggae-gold flex items-center justify-center">
                         <Play size={32} className="text-reggae-black ml-1" />
                       </div>
                     </div>
-                    {activeIndex === 0 && isPlaying && (
+                    {activeIndex === 0 && (
                       <div className="absolute bottom-4 right-4 animate-pulse">
                         <Volume size={24} className="text-white" />
                       </div>
@@ -158,10 +204,12 @@ const Mixes = () => {
                       FEATURED
                     </div>
                     <h3 className="font-heading text-4xl text-white mb-3">{popularMixes[0].title}</h3>
-                    <p className="text-white/80 text-lg mb-3">By {popularMixes[0].dj} • {popularMixes[0].genre}</p>
+                    <p className="text-white/80 text-lg mb-3">
+                      By {popularMixes[0].dj} • {popularMixes[0].genre}
+                    </p>
                     <p className="text-white/60 mb-6 max-w-2xl">{popularMixes[0].description}</p>
                     <div className="flex items-center gap-6">
-                      <button 
+                      <button
                         className="bg-reggae-gold text-reggae-black px-6 py-2 rounded-full flex items-center gap-2 hover:bg-opacity-90 transition"
                         onClick={() => handlePlay(0)}
                       >
@@ -177,24 +225,33 @@ const Mixes = () => {
                         {popularMixes[0].likes} likes
                       </div>
                     </div>
+                    <div className="mt-4">
+                      <iframe
+                        width="100%"
+                        height="166"
+                        scrolling="no"
+                        frameBorder="no"
+                        allow="autoplay"
+                        src={getIframeSrc(popularMixes[0], 0)}
+                        title={popularMixes[0].title}
+                      ></iframe>
+                    </div>
                   </div>
                 </div>
               </div>
             </section>
           )}
-          
-          {/* Filter Section */}
+
           <section className="py-8">
             <div className="container mx-auto px-4">
               <div className="flex flex-wrap justify-center gap-3 mb-6">
-                {categories.map(category => (
+                {categories.map((category) => (
                   <button
                     key={category}
-                    className={`px-5 py-2 rounded-full transition-all ${
-                      activeCategory === category 
-                        ? 'bg-reggae-gold text-reggae-black font-bold shadow-md' 
+                    className={`px-5 py-2 rounded-full transition-all ${activeCategory === category
+                        ? 'bg-reggae-gold text-reggae-black font-bold shadow-md'
                         : 'bg-white/10 text-white hover:bg-white/20'
-                    }`}
+                      }`}
                     onClick={() => setActiveCategory(category)}
                   >
                     {category}
@@ -203,77 +260,93 @@ const Mixes = () => {
               </div>
             </div>
           </section>
-          
-          {/* Mixes Grid - Spotify Style */}
+
           <section className="py-8">
             <div className="container mx-auto px-4">
               <div className="bg-white/5 rounded-lg p-4 mb-12">
                 <h2 className="font-heading text-2xl text-white mb-6">All Mixes</h2>
-                <table className="w-full table-auto">
-                  <thead className="border-b border-white/10">
-                    <tr>
-                      <th className="text-left py-4 text-white/60 font-normal">#</th>
-                      <th className="text-left py-4 text-white/60 font-normal">TITLE</th>
-                      <th className="text-left py-4 text-white/60 font-normal hidden md:table-cell">DJ</th>
-                      <th className="text-left py-4 text-white/60 font-normal hidden md:table-cell">GENRE</th>
-                      <th className="text-left py-4 text-white/60 font-normal hidden lg:table-cell">DATE</th>
-                      <th className="text-right py-4 text-white/60 font-normal">
-                        <Clock size={18} />
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredMixes.map((mix, index) => (
-                      <tr 
-                        key={mix.id} 
-                        className={`border-b border-white/5 hover:bg-white/10 group transition-colors ${
-                          activeIndex === index ? 'bg-white/10' : ''
-                        }`}
-                      >
-                        <td className="py-4 text-white/60 text-left">
-                          <div className="relative">
-                            <span className="group-hover:hidden">{index + 1}</span>
-                            <button 
-                              className="hidden group-hover:block absolute top-1/2 -translate-y-1/2"
-                              onClick={() => handlePlay(index)}
-                            >
-                              {activeIndex === index && isPlaying ? (
-                                <Volume size={18} className="text-reggae-gold" />
-                              ) : (
-                                <Play size={18} className="text-white" />
-                              )}
-                            </button>
-                          </div>
-                        </td>
-                        <td className="py-4">
-                          <div className="flex items-center">
-                            <div className="w-10 h-10 rounded mr-3 overflow-hidden hidden sm:block">
-                              <img 
-                                src={mix.imageUrl} 
-                                alt={mix.title} 
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div>
-                              <h4 className="font-medium text-white">{mix.title}</h4>
-                              <p className="text-white/60 text-sm md:hidden">{mix.dj}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-4 text-white/60 hidden md:table-cell">{mix.dj}</td>
-                        <td className="py-4 text-white/60 hidden md:table-cell">{mix.genre}</td>
-                        <td className="py-4 text-white/60 hidden lg:table-cell">{mix.date}</td>
-                        <td className="py-4 text-white/60 text-right">{mix.duration}</td>
+                {isLoading ? (
+                  <p className="text-center text-white/60">Loading mixes...</p>
+                ) : filteredMixes.length > 0 ? (
+                  <table className="w-full table-auto">
+                    <thead className="border-b border-white/10">
+                      <tr>
+                        <th className="text-left py-4 text-white/60 font-normal">#</th>
+                        <th className="text-left py-4 text-white/60 font-normal">TITLE</th>
+                        <th className="text-left py-4 text-white/60 font-normal hidden md:table-cell">DJ</th>
+                        <th className="text-left py-4 text-white/60 font-normal hidden md:table-cell">GENRE</th>
+                        <th className="text-left py-4 text-white/60 font-normal hidden lg:table-cell">DATE</th>
+                        <th className="text-right py-4 text-white/60 font-normal">
+                          <Clock size={18} />
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {filteredMixes.map((mix, index) => (
+                        <tr
+                          key={mix.id}
+                          className={`border-b border-white/5 hover:bg-white/10 group transition-colors ${activeIndex === index ? 'bg-white/10' : ''
+                            }`}
+                        >
+                          <td className="py-4 text-white/60 text-left">
+                            <div className="relative">
+                              <span className="group-hover:hidden">{index + 1}</span>
+                              <button
+                                className="hidden group-hover:block absolute top-1/2 -translate-y-1/2"
+                                onClick={() => handlePlay(index)}
+                              >
+                                {activeIndex === index ? (
+                                  <Volume size={18} className="text-reggae-gold" />
+                                ) : (
+                                  <Play size={18} className="text-white" />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                          <td className="py-4">
+                            <div className="flex items-center">
+                              <div className="w-10 h-10 rounded mr-3 overflow-hidden hidden sm:block">
+                                <img
+                                  src={mix.imageUrl}
+                                  alt={mix.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div>
+                                <h4 className="font-medium text-white">{mix.title}</h4>
+                                <p className="text-white/60 text-sm md:hidden">{mix.dj}</p>
+                              </div>
+                            </div>
+                            {activeIndex === index && (
+                              <div className="mt-2">
+                                <iframe
+                                  width="100%"
+                                  height="100"
+                                  scrolling="no"
+                                  frameBorder="no"
+                                  allow="autoplay"
+                                  src={getIframeSrc(mix, index)}
+                                  title={mix.title}
+                                ></iframe>
+                              </div>
+                            )}
+                          </td>
+                          <td className="py-4 text-white/60 hidden md:table-cell">{mix.dj}</td>
+                          <td className="py-4 text-white/60 hidden md:table-cell">{mix.genre}</td>
+                          <td className="py-4 text-white/60 hidden lg:table-cell">{mix.date}</td>
+                          <td className="py-4 text-white/60 text-right">{mix.duration}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-center text-white/60">No mixes available.</p>
+                )}
               </div>
             </div>
           </section>
-          
-          {/* Call to Action */}
-          <section className="py-16 bg-[url('/reggae-artist.jpg')] bg-cover bg-center relative">
+
+          <section className="py-16 bg-[url('/reggae-artwork.jpg')] bg-cover bg-center relative">
             <div className="absolute inset-0 bg-gradient-to-r from-reggae-black to-reggae-black/70"></div>
             <div className="container mx-auto px-4 text-center relative z-10">
               <h2 className="font-heading text-3xl mb-6 text-white">WANT TO CONTRIBUTE A MIX?</h2>
@@ -288,7 +361,6 @@ const Mixes = () => {
           </section>
         </div>
       </main>
-      
       <Footer />
     </>
   );

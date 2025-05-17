@@ -24,19 +24,25 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-reggae-black bg-opacity-95 shadow-md py-2' : 'bg-transparent py-4'}`}>
+    <> <nav className={`fixed w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-reggae-black bg-opacity-95 shadow-md py-2' : 'bg-reggae-black py-4'}`}>
       <div className="container mx-auto px-4 flex justify-between items-center">
         {/* Logo */}
         <Link to="/" className="flex items-center">
-          <span className="text-white font-heading text-2xl md:text-3xl">HOUSE OF REGGAE</span>
+          <span className="text-white font-heading text-2xl md:text-3xl"> <img
+            className="w-[1px] sm:w-[40px] md:w-[80px] lg:w-[50px] h-auto mb-4"
+            src="logo.jpg"
+            alt="House of Reggae Logo"
+          /></span>
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-8">
           <NavLink to="/">Home</NavLink>
+
+
+          <NavLink to="/about">About</NavLink>
           <NavLink to="/gallery">Gallery</NavLink>
           <NavLink to="/team">Team</NavLink>
-          <NavLink to="/about">About</NavLink>
           <NavLink to="/contact">Contact</NavLink>
           <NavLink to="/marketplace" className="bg-reggae-red px-4 py-2 rounded-md hover:bg-opacity-90 transition duration-200">
             Shop
@@ -44,8 +50,8 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden text-white focus:outline-none" 
+        <button
+          className="md:hidden text-white focus:outline-none"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -67,14 +73,16 @@ const Navbar = () => {
           </div>
         </div>
       )}
-    </nav>
+    </nav><br></br>
+    </>
+
   );
 };
 
 // Desktop NavLink Component
 const NavLink = ({ to, children, className = "" }: { to: string, children: React.ReactNode, className?: string }) => (
-  <Link 
-    to={to} 
+  <Link
+    to={to}
     className={`text-white hover:text-reggae-gold transition duration-200 ${className}`}
   >
     {children}
@@ -83,8 +91,8 @@ const NavLink = ({ to, children, className = "" }: { to: string, children: React
 
 // Mobile NavLink Component
 const MobileNavLink = ({ to, children, className = "", onClick }: { to: string, children: React.ReactNode, className?: string, onClick: () => void }) => (
-  <Link 
-    to={to} 
+  <Link
+    to={to}
     className={`text-white hover:text-reggae-gold transition duration-200 block py-2 ${className}`}
     onClick={onClick}
   >

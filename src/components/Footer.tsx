@@ -1,25 +1,50 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Instagram, Youtube, Facebook, Twitter, Mail } from 'lucide-react';
-
 const Footer = () => {
+
+
+  const socialIcons = [
+    { src: "/instagram.svg", alt: "Instagram", href: "https://www.instagram.com/thehouseofreggae/" },
+    { src: "/sound.svg", alt: "SoundCloud", href: "https://soundcloud.com/house-of-reggae-637215843" }, // Restored original SoundCloud
+    { src: "/x.svg", alt: "Twitter/X", href: "https://x.com/HouseOFReggaeUG" },
+    { src: "/tiktok.svg", alt: "SoundCloud", href: "https://t.co/kYfi4WdTCP" },
+    { src: "/mix.svg", alt: "Mixcloud", href: "https://www.mixcloud.com/houseofreggae/" },
+    { src: "/tube.svg", alt: "YouTube", href: "https://www.youtube.com/@houseofreggae" },
+
+
+  ];
   return (
     <footer className="bg-reggae-black text-white pt-16 pb-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="md:col-span-1 lg:col-span-1">
-            <h3 className="font-heading text-3xl mb-4">HOUSE OF REGGAE</h3>
+            <h3 className="font-heading text-3xl mb-4"> <img
+              className="w-[90px] sm:w-[100px] md:w-[110px] lg:w-[125px] h-auto mb-4"
+              src="logo.jpg"
+              alt="House of Reggae Logo"
+            /></h3>
             <p className="mb-6 text-gray-300 max-w-xs">
               Curating Uganda's Reggae Culture, One Vibe at a Time.
             </p>
-            <div className="flex space-x-4">
-              <SocialIcon icon={<Instagram size={20} />} href="https://instagram.com" />
-              <SocialIcon icon={<Facebook size={20} />} href="https://facebook.com" />
-              <SocialIcon icon={<Twitter size={20} />} href="https://twitter.com" />
-              <SocialIcon icon={<Youtube size={20} />} href="https://youtube.com" />
+            <div className="flex gap-4 flex-wrap">
+              {socialIcons.map((icon, iconIndex) => (
+                <a
+                  key={iconIndex}
+                  href={icon.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    className="w-6 h-6 hover:opacity-80 transition-opacity"
+                    src={icon.src}
+                    alt={icon.alt}
+                  />
+                </a>
+              ))}
             </div>
+
           </div>
 
           {/* Quick Links */}
@@ -51,12 +76,13 @@ const Footer = () => {
             <p className="mb-2 text-gray-300">Kampala, Uganda</p>
             <p className="mb-2 text-gray-300">info@houseofreggae.com</p>
             <p className="mb-6 text-gray-300">+256 700 123456</p>
+
             <Link to="/contact" className="bg-reggae-red hover:bg-opacity-90 transition duration-200 text-white py-2 px-4 rounded-md inline-block">
               Send Message
             </Link>
           </div>
         </div>
-        
+
         <div className="bead-divider mt-12 mb-6">
           <span>⚫</span>
         </div>
@@ -70,9 +96,9 @@ const Footer = () => {
 };
 
 const SocialIcon = ({ icon, href }: { icon: React.ReactNode, href: string }) => (
-  <a 
-    href={href} 
-    target="_blank" 
+  <a
+    href={href}
+    target="_blank"
     rel="noopener noreferrer"
     className="bg-reggae-black hover:bg-reggae-red transition duration-200 h-10 w-10 flex items-center justify-center rounded-full border border-gray-700"
   >

@@ -1,97 +1,194 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Music } from 'lucide-react';
 
-const mixes = [
-  {
-    id: 1,
-    title: 'Rootsman Edition 4',
-    dj: 'DJ Zion',
-    genre: 'Ugandan Reggae',
-    date: 'May 2, 2025',
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1219621886&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-dj.jpg',
-  },
-  {
-    id: 2,
-    title: "Skank'n Reggae 8",
-    dj: 'Selecta Morris',
-    genre: 'Dub',
-    date: 'April 15, 2025',
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1334568403&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-drums.jpg',
-  },
-  {
-    id: 3,
-    title: 'Empress Vibes Vol. 1',
-    dj: 'Sister Blaze',
-    genre: 'Roots',
-    date: 'March 28, 2025',
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1508795148&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-artwork.jpg',
-  },
-  {
-    id: 4,
-    title: 'Lovers Rock Special',
-    dj: 'DJ Conscious',
-    genre: 'Lovers Rock',
-    date: 'February 14, 2025',
-    embedUrl: 'https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/1410256938&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true',
-    imageUrl: '/reggae-beach.jpg',
-  },
-];
+const USERNAME = "house-of-reggae-637215843";
+const CLIENT_ID = "CcuNTbKkAMIPLedGcyTw430ppDRwSZ3n"; // Replace with your SoundCloud Client ID
+const CLIENT_SECRET = "P3EBzF7Bw8CuSTqG0zw4pIdJaMTbbEn2"; // Replace with your SoundCloud Client Secret
 
-const categories = ['All', 'Ugandan Reggae', 'Roots', 'Dub', 'Lovers Rock'];
+interface Track {
+  id: number;
+  title: string;
+  dj: string;
+  genre: string;
+  date: string;
+  embedUrl: string;
+  imageUrl: string;
+}
 
 const FeaturedMixes = () => {
-  const [activeCategory, setActiveCategory] = useState('All');
-  
-  const filteredMixes = activeCategory === 'All' 
-    ? mixes 
-    : mixes.filter(mix => mix.genre === activeCategory);
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch token from SoundCloud API
+  useEffect(() => {
+    const fetchToken = async () => {
+      const cachedToken = localStorage.getItem('soundcloud_access_token');
+      const cachedExpiry = localStorage.getItem('soundcloud_token_expiry');
+      const now = Date.now();
+
+      if (cachedToken && cachedExpiry && now < parseInt(cachedExpiry)) {
+        setAccessToken(cachedToken);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const credentials = btoa(`${CLIENT_ID}:${CLIENT_SECRET}`);
+        const response = await fetch("https://api.soundcloud.com/oauth2/token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Basic ${credentials}`,
+            Accept: "application/json; charset=utf-8",
+          },
+          body: new URLSearchParams({
+            grant_type: "client_credentials",
+          }),
+        });
+
+        if (response.status === 429) {
+          const retryAfter = response.headers.get('Retry-After');
+          const waitTime = retryAfter ? parseInt(retryAfter, 10) * 1000 : 60000; // default to 60 seconds
+          console.warn(`Rate limited. Retrying after ${waitTime / 1000} seconds.`);
+          setTimeout(fetchToken, waitTime);
+          return;
+        }
+
+        const data = await response.json();
+
+        if (data.access_token) {
+          setAccessToken(data.access_token);
+          localStorage.setItem("soundcloud_access_token", data.access_token);
+          const expiresIn = data.expires_in ? data.expires_in : 3600; // default to 1 hour
+          localStorage.setItem(
+            "soundcloud_token_expiry",
+            (now + expiresIn * 1000).toString()
+          );
+          setIsLoading(false);
+        } else {
+          throw new Error("No access token in response");
+        }
+      } catch (error) {
+        console.error("Error fetching token:", error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchToken();
+  }, []);
+
+  // Resolve SoundCloud user ID
+  const resolveUserId = async (username: string, token: string): Promise<number | null> => {
+    try {
+      const response = await fetch(
+        `https://api.soundcloud.com/resolve?url=https://soundcloud.com/${username}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json; charset=utf-8",
+          },
+        }
+      );
+
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        const waitTime = retryAfter ? parseInt(retryAfter, 10) * 1000 : 60000;
+        console.warn(`Rate limited. Retrying after ${waitTime / 1000} seconds.`);
+        setTimeout(() => resolveUserId(username, token), waitTime);
+        return null;
+      }
+
+      const data = await response.json();
+      return data.id;
+    } catch (error) {
+      console.error("Error resolving user ID:", error);
+      return null;
+    }
+  };
+
+  // Fetch tracks from SoundCloud (limit to 4)
+  const fetchTracks = async (userId: number, token: string) => {
+    try {
+      const response = await fetch(
+        `https://api.soundcloud.com/users/${userId}/tracks?limit=4`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json; charset=utf-8",
+          },
+        }
+      );
+
+      if (response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        const waitTime = retryAfter ? parseInt(retryAfter, 10) * 1000 : 60000;
+        console.warn(`Rate limited. Retrying after ${waitTime / 1000} seconds.`);
+        setTimeout(() => fetchTracks(userId, token), waitTime);
+        return;
+      }
+
+      const data = await response.json();
+      const mappedTracks: Track[] = data.map((track: any) => ({
+        id: track.id,
+        title: track.title,
+        dj: track.user.username,
+        genre: track.genre || 'Reggae',
+        date: new Date(track.created_at).toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+        embedUrl: `https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/${track.id}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true`,
+        imageUrl: track.artwork_url?.replace('-large', '-t500x500') || '/reggae-artwork.jpg',
+      }));
+      setTracks(mappedTracks);
+    } catch (error) {
+      console.error("Error fetching tracks:", error);
+    }
+  };
+
+  // Fetch tracks when token is available
+  useEffect(() => {
+    const fetchData = async () => {
+      if (accessToken) {
+        const userId = await resolveUserId(USERNAME, accessToken);
+        if (userId) {
+          fetchTracks(userId, accessToken);
+        }
+      }
+    };
+
+    fetchData();
+  }, [accessToken]);
 
   return (
-    <section className="py-20 bg-reggae-black text-white">
+    <section className="py-12 bg-reggae-black text-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="section-title text-white">Featured Mixes</h2>
-          <div className="relative mb-10">
-            <div className="absolute left-1/2 transform -translate-x-1/2 -top-6 w-16 h-1 bg-reggae-gold"></div>
+        <div className="text-center mb-8">
+          <h2 className="section-title text-white text-3xl font-bold">Featured Mixes</h2>
+          <div className="relative mb-6">
+            <div className="absolute left-1/2 transform -translate-x-1/2 -top-4 w-12 h-1 bg-reggae-gold"></div>
           </div>
         </div>
-        
-        {/* Category Filter */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {categories.map(category => (
-            <button
-              key={category}
-              className={`px-4 py-2 rounded-full transition-all ${
-                activeCategory === category 
-                  ? 'bg-reggae-gold text-reggae-black font-bold' 
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-              }`}
-              onClick={() => setActiveCategory(category)}
-            >
-              {category}
-            </button>
-          ))}
+
+        <div className="flex flex-wrap justify-center gap-6">
+          {isLoading ? (
+            <p className="text-center">Loading mixes...</p>
+          ) : tracks.length > 0 ? (
+            tracks.map((mix) => <MixCard key={mix.id} mix={mix} />)
+          ) : (
+            <p className="text-center">No mixes available.</p>
+          )}
         </div>
-        
-        {/* Mixes Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredMixes.map(mix => (
-            <MixCard key={mix.id} mix={mix} />
-          ))}
-        </div>
-        
-        {/* See All Mixes Button */}
-        <div className="text-center mt-10">
-          <Link 
-            to="/mixes" 
-            className="bg-reggae-gold text-reggae-black font-bold py-3 px-6 rounded-md hover:bg-opacity-90 transition duration-200 inline-flex items-center"
+
+        <div className="text-center mt-8">
+          <Link
+            to="/mixes"
+            className="bg-reggae-gold text-reggae-black font-bold py-2 px-4 rounded-md hover:bg-opacity-90 transition duration-200 inline-flex items-center"
           >
-            <Music size={20} className="mr-2" />
+            <Music size={16} className="mr-2" />
             See All Mixes
           </Link>
         </div>
@@ -100,29 +197,38 @@ const FeaturedMixes = () => {
   );
 };
 
-const MixCard = ({ mix }: { mix: any }) => {
+interface MixCardProps {
+  mix: Track;
+}
+
+const MixCard: React.FC<MixCardProps> = ({ mix }) => {
   return (
-    <Link to="/mixes" className="bg-gray-900 rounded-lg overflow-hidden hover:transform hover:scale-105 transition duration-300 block">
-      <div className="h-48 bg-gray-800 relative">
+    <Link
+      to="/mixes"
+      className="bg-gray-900 rounded-lg overflow-hidden hover:transform hover:scale-105 transition duration-300 block w-full sm:w-80"
+    >
+      <div className="h-40 bg-gray-800 relative">
         <img src={mix.imageUrl} alt={mix.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-        <div className="absolute bottom-3 left-3">
+        <div className="absolute bottom-2 left-2">
           <span className="bg-reggae-red text-white text-xs px-2 py-1 rounded">
             {mix.genre}
           </span>
         </div>
       </div>
-      
-      <div className="p-4">
-        <h3 className="font-heading text-xl text-white mb-1">{mix.title}</h3>
-        <p className="text-gray-400 text-sm mb-3">By {mix.dj} • {mix.date}</p>
-        
-        <div className="h-20">
-          <iframe 
-            width="100%" 
-            height="100%" 
-            scrolling="no" 
-            frameBorder="no" 
+
+      <div className="p-3">
+        <h3 className="font-heading text-lg text-white mb-1 truncate">{mix.title}</h3>
+        <p className="text-gray-400 text-xs mb-2">
+          By {mix.dj} • {mix.date}
+        </p>
+
+        <div className="h-16">
+          <iframe
+            width="100%"
+            height="100%"
+            scrolling="no"
+            frameBorder="no"
             src={mix.embedUrl}
             title={mix.title}
           ></iframe>
